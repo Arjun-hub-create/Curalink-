@@ -392,3 +392,16 @@ curalink/
 ---
 
 Built for the Humanity Founders Hackathon.
+
+
+<!-- frontend
+cd c:\Users\arjun\OneDrive\Documents\RESUME\curalink
+npm run dev:frontend -->
+
+<!-- Backend
+cd c:\Users\arjun\OneDrive\Documents\RESUME\curalink
+npm run dev:backend -->
+
+<!-- Installation
+cd c:\Users\arjun\OneDrive\Documents\RESUME\curalink
+npm run install:all -->
