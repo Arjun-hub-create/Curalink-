@@ -71,38 +71,47 @@ async function detectAvailableModel() {
 }
 
 async function callOllama(prompt, system) {
-  const messages = [
-    { role: 'system', content: system },
-    { role: 'user', content: prompt }
-  ];
-  const opts = { temperature: 0.3, top_p: 0.9, num_predict: 3000 };
-
-  // Attempt 1
-  try {
-    console.log(`[Structured/Ollama] Attempt 1 — model: "${OLLAMA_MODEL}"`);
-    const response = await axios.post(`${OLLAMA_BASE}/api/chat`, {
-      model: OLLAMA_MODEL, messages, stream: false, options: opts
-    }, { timeout: 180000 });
-    console.log('[Structured/Ollama] Attempt 1 succeeded');
-    return response.data?.message?.content || '';
-  } catch (error) {
-    console.error('[Structured/Ollama] Attempt 1 failed:', error.code || error.response?.status, error.message);
-    if (error.code === 'ECONNREFUSED') throw new Error('OLLAMA_NOT_RUNNING');
+  // Try Groq first
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 3000,
+          temperature: 0.3
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000
+        }
+      );
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error('Groq failed, trying Ollama fallback:', error.message);
+    }
   }
 
-  // Wait 2s, retry with auto-detected model
-  await new Promise(r => setTimeout(r, 2000));
+  // Fallback to Ollama
   try {
-    const detectedModel = await detectAvailableModel();
-    const modelToUse = detectedModel || OLLAMA_MODEL;
-    console.log(`[Structured/Ollama] Attempt 2 — model: "${modelToUse}"`);
     const response = await axios.post(`${OLLAMA_BASE}/api/chat`, {
-      model: modelToUse, messages, stream: false, options: opts
-    }, { timeout: 180000 });
-    console.log('[Structured/Ollama] Attempt 2 succeeded');
+      model: OLLAMA_MODEL,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: prompt }
+      ],
+      stream: false,
+      options: { temperature: 0.3, num_predict: 3000 }
+    }, { timeout: 120000 });
     return response.data?.message?.content || '';
   } catch (error) {
-    console.error('[Structured/Ollama] Attempt 2 failed:', error.code || error.response?.status, error.message);
     if (error.code === 'ECONNREFUSED') throw new Error('OLLAMA_NOT_RUNNING');
     throw error;
   }

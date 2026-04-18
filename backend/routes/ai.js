@@ -52,58 +52,46 @@ async function detectAvailableModel() {
  * - If model not found, auto-detects available models and retries
  */
 async function callOllama(messages, system = SYSTEM_PROMPT) {
-  const fullMessages = [{ role: 'system', content: system }, ...messages];
-  const requestConfig = { timeout: 300000 };
-
-  // --- Attempt 1: try configured model ---
-  try {
-    console.log(`[Ollama] Attempt 1 — model: "${OLLAMA_MODEL}", url: "${OLLAMA_BASE}/api/chat"`);
-    const response = await axios.post(`${OLLAMA_BASE}/api/chat`, {
-      model: OLLAMA_MODEL,
-      messages: fullMessages,
-      stream: false,
-      options: { temperature: 0.7, top_p: 0.9, num_predict: 400 }
-    }, requestConfig);
-    console.log('[Ollama] Attempt 1 succeeded');
-    return response.data?.message?.content || '';
-  } catch (error) {
-    console.error('[Ollama] Attempt 1 failed:', error.code || error.response?.status, error.message);
-    if (error.response?.data) console.error('[Ollama] Error body:', JSON.stringify(error.response.data));
-
-    if (error.code === 'ECONNREFUSED') {
-      throw new Error('OLLAMA_NOT_RUNNING');
+  // Try Groq first — fast, free, runs Llama 3.3
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: system },
+            ...messages
+          ],
+          max_tokens: 1024,
+          temperature: 0.7
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000
+        }
+      );
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error('Groq failed, trying Ollama fallback:', error.message);
     }
   }
 
-  // --- Wait 2 seconds before retry ---
-  console.log('[Ollama] Waiting 2 seconds before retry...');
-  await new Promise(r => setTimeout(r, 2000));
-
-  // --- Attempt 2: try auto-detecting model ---
+  // Fallback to local Ollama if Groq fails or key not set
   try {
-    const detectedModel = await detectAvailableModel();
-    const modelToUse = detectedModel || OLLAMA_MODEL;
-
-    console.log(`[Ollama] Attempt 2 — model: "${modelToUse}"`);
     const response = await axios.post(`${OLLAMA_BASE}/api/chat`, {
-      model: modelToUse,
-      messages: fullMessages,
+      model: OLLAMA_MODEL,
+      messages: [{ role: 'system', content: system }, ...messages],
       stream: false,
-      options: { temperature: 0.7, top_p: 0.9, num_predict: 400 }
-    }, requestConfig);
-    console.log('[Ollama] Attempt 2 succeeded');
+      options: { temperature: 0.7, top_p: 0.9, num_predict: 1024 }
+    }, { timeout: 120000 });
     return response.data?.message?.content || '';
   } catch (error) {
-    console.error('[Ollama] Attempt 2 failed:', error.code || error.response?.status, error.message);
-    if (error.response?.data) console.error('[Ollama] Error body:', JSON.stringify(error.response.data));
-
-    if (error.code === 'ECONNREFUSED') {
-      throw new Error('OLLAMA_NOT_RUNNING');
-    }
-
-    // Forward actual error details
-    const detail = error.response?.data?.error || error.message || 'Unknown Ollama error';
-    throw new Error(`OLLAMA_CALL_FAILED: ${detail}`);
+    if (error.code === 'ECONNREFUSED') throw new Error('OLLAMA_NOT_RUNNING');
+    throw error;
   }
 }
 
@@ -281,32 +269,26 @@ router.delete('/sessions/:id', protect, async (req, res) => {
 // GET /api/ai/status — Check Ollama connectivity & models
 // ──────────────────────────────────────────────
 router.get('/status', async (req, res) => {
+  const groqConfigured = !!process.env.GROQ_API_KEY;
+  
+  // Check Ollama
+  let ollamaRunning = false;
+  let availableModels = [];
   try {
-    const response = await axios.get(`${OLLAMA_BASE}/api/tags`, { timeout: 5000 });
-    const models = response.data?.models?.map(m => m.name) || [];
-    const configBase = OLLAMA_MODEL.split(':')[0];
-    const modelReady = models.some(m => m.startsWith(configBase));
-    res.json({
-      ollamaRunning: true,
-      availableModels: models,
-      activeModel: OLLAMA_MODEL,
-      modelReady,
-      ollamaUrl: OLLAMA_BASE,
-      message: modelReady
-        ? `Ollama is running with model "${OLLAMA_MODEL}" ready.`
-        : `Ollama is running but model "${OLLAMA_MODEL}" is not found. Available: ${models.join(', ') || 'none'}. Run: ollama pull ${OLLAMA_MODEL}`
-    });
-  } catch (err) {
-    console.error('[Status] Ollama check failed:', err.message);
-    res.json({
-      ollamaRunning: false,
-      availableModels: [],
-      activeModel: OLLAMA_MODEL,
-      modelReady: false,
-      ollamaUrl: OLLAMA_BASE,
-      message: `Ollama is not running at ${OLLAMA_BASE}. Start it with: ollama serve`
-    });
-  }
+    const response = await axios.get(`${OLLAMA_BASE}/api/tags`, { timeout: 3000 });
+    availableModels = response.data?.models?.map(m => m.name) || [];
+    ollamaRunning = true;
+  } catch {}
+
+  res.json({
+    groqConfigured,
+    groqModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+    activeLLM: groqConfigured ? 'Groq (Llama 3.3 — fast)' : 'Ollama (local)',
+    ollamaRunning,
+    availableModels,
+    activeModel: OLLAMA_MODEL,
+    modelReady: groqConfigured || availableModels.some(m => m.startsWith(OLLAMA_MODEL.split(':')[0]))
+  });
 });
 
 // ──────────────────────────────────────────────
