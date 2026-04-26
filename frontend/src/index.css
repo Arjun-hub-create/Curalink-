@@ -221,6 +221,190 @@ body {
   border-color: rgba(14,165,233,0.5);
 }
 
+/* ── Select Dropdown Styling ──────────────────────────────────────────────── */
+select.medical-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237dd3fc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+select.medical-input:hover {
+  border-color: rgba(14, 165, 233, 0.45);
+  background-color: rgba(14, 165, 233, 0.08);
+}
+
+select.medical-input:focus {
+  outline: none;
+  border-color: rgba(14, 165, 233, 0.6);
+  background-color: rgba(14, 165, 233, 0.1);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12), 0 0 20px rgba(14, 165, 233, 0.08);
+}
+
+/* Style the native dropdown option list */
+select.medical-input option {
+  background-color: #0c1a2e;
+  color: #e0f2fe;
+  padding: 10px 14px;
+  font-family: 'DM Sans', sans-serif;
+  border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+}
+
+select.medical-input option:hover,
+select.medical-input option:focus,
+select.medical-input option:checked {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(20, 184, 166, 0.2));
+  color: #7dd3fc;
+}
+
+select.medical-input option:disabled {
+  color: #475569;
+}
+
+/* ── Checkbox Styling ────────────────────────────────────────────────────── */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(14, 165, 233, 0.35);
+  border-radius: 5px;
+  background: rgba(14, 165, 233, 0.06);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+input[type="checkbox"]:hover {
+  border-color: rgba(14, 165, 233, 0.65);
+  background: rgba(14, 165, 233, 0.12);
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.15);
+  transform: scale(1.05);
+}
+
+input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  border-color: transparent;
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.3);
+  animation: checkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: checkMark 0.2s ease-out 0.1s both;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2), 0 0 16px rgba(14, 165, 233, 0.15);
+}
+
+@keyframes checkPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes checkMark {
+  0% { opacity: 0; transform: rotate(45deg) scale(0); }
+  100% { opacity: 1; transform: rotate(45deg) scale(1); }
+}
+
+/* ── Radio Button Styling ────────────────────────────────────────────────── */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid rgba(14, 165, 233, 0.35);
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.06);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+input[type="radio"]:hover {
+  border-color: rgba(14, 165, 233, 0.65);
+  background: rgba(14, 165, 233, 0.12);
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.15);
+  transform: scale(1.05);
+}
+
+input[type="radio"]:checked {
+  border-color: #0ea5e9;
+  background: transparent;
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.25);
+  animation: checkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  transform: translate(-50%, -50%);
+  animation: radioDot 0.25s ease-out;
+}
+
+input[type="radio"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2), 0 0 16px rgba(14, 165, 233, 0.15);
+}
+
+@keyframes radioDot {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  60% { transform: translate(-50%, -50%) scale(1.3); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ── Date Input Styling ──────────────────────────────────────────────────── */
+input[type="date"].medical-input {
+  color-scheme: dark;
+  position: relative;
+}
+
+input[type="date"].medical-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.7) sepia(1) saturate(3) hue-rotate(175deg);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"].medical-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* ── Form element focus ring animation ───────────────────────────────────── */
+@keyframes focusGlow {
+  0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(14, 165, 233, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+}
+
 /* Scan line effect */
 @keyframes scanline {
   0% { top: -5%; }
