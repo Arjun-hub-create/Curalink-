@@ -51,33 +51,44 @@ async function detectAvailableModel() {
  * - On failure, retrying once after 2 seconds
  * - If model not found, auto-detects available models and retries
  */
+const GROQ_MODELS = [
+  process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+  'qwen/qwen3.8-27b',
+  'openai/gpt-oss-20b'
+];
+
 async function callOllama(messages, system = SYSTEM_PROMPT) {
-  // Groq Api Key
+  // Try Groq cloud LLM first (primary AI provider for deployed environments)
   if (process.env.GROQ_API_KEY) {
-    try {
-      const response = await axios.post(
-        'https://api.groq.com/openai/v1/chat/completions',
-        {
-          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: system },
-            ...messages
-          ],
-          max_tokens: 1024,
-          temperature: 0.7
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-            'Content-Type': 'application/json'
+    for (const model of GROQ_MODELS) {
+      try {
+        console.log(`[AI] Trying Groq model: ${model}`);
+        const response = await axios.post(
+          'https://api.groq.com/openai/v1/chat/completions',
+          {
+            model,
+            messages: [
+              { role: 'system', content: system },
+              ...messages
+            ],
+            max_tokens: 1024,
+            temperature: 0.7
           },
-          timeout: 30000
-        }
-      );
-      return response.data.choices[0].message.content;
-    } catch (error) {
-      console.error('Groq failed, trying Ollama fallback:', error.message);
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 30000
+          }
+        );
+        console.log(`[AI] Groq model ${model} succeeded`);
+        return response.data.choices[0].message.content;
+      } catch (error) {
+        console.error(`[AI] Groq model ${model} failed:`, error.response?.data?.error?.message || error.message);
+      }
     }
+    console.error('[AI] All Groq models failed, trying Ollama fallback');
   }
 
   // Fallback to local Ollama if Groq fails or key not set
@@ -96,7 +107,7 @@ async function callOllama(messages, system = SYSTEM_PROMPT) {
 }
 
 function ollamaFallback(msg) {
-  return `**Ollama (Local LLM) is not running.**\n\nTo enable AI:\n1. Install from **https://ollama.com/download**\n2. Run: \`ollama pull llama3.2\`\n3. Run: \`ollama serve\`\n4. Restart backend\n\nYour question: "${msg}"\n\n> All search features (PubMed, OpenAlex, ClinicalTrials) work without Ollama.`;
+  return `**AI service is temporarily unavailable.**\n\nWe're having trouble connecting to the AI provider. Please try again in a moment.\n\nYour question: "${msg}"\n\n> All search features (PubMed, OpenAlex, ClinicalTrials) still work normally.`;
 }
 
 // ──────────────────────────────────────────────
@@ -282,8 +293,8 @@ router.get('/status', async (req, res) => {
 
   res.json({
     groqConfigured,
-    groqModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-    activeLLM: groqConfigured ? 'Groq (Llama 3.3 — fast)' : 'Ollama (local)',
+    groqModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    activeLLM: groqConfigured ? `Groq (${process.env.GROQ_MODEL || 'openai/gpt-oss-120b'})` : 'Ollama (local)',
     ollamaRunning,
     availableModels,
     activeModel: OLLAMA_MODEL,

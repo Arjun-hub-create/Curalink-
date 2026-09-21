@@ -269,33 +269,44 @@ async function detectAvailableModel() {
   } catch { return null; }
 }
 
+const GROQ_MODELS = [
+  process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+  'qwen/qwen3.8-27b',
+  'openai/gpt-oss-20b'
+];
+
 async function callOllama(messages, system) {
-  // Try Groq first
+  // Try Groq cloud LLM first
   if (process.env.GROQ_API_KEY) {
-    try {
-      const response = await axios.post(
-        'https://api.groq.com/openai/v1/chat/completions',
-        {
-          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: system },
-            ...messages
-          ],
-          max_tokens: 2000,
-          temperature: 0.3
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-            'Content-Type': 'application/json'
+    for (const model of GROQ_MODELS) {
+      try {
+        console.log(`[Unified] Trying Groq model: ${model}`);
+        const response = await axios.post(
+          'https://api.groq.com/openai/v1/chat/completions',
+          {
+            model,
+            messages: [
+              { role: 'system', content: system },
+              ...messages
+            ],
+            max_tokens: 2000,
+            temperature: 0.3
           },
-          timeout: 30000
-        }
-      );
-      return response.data.choices[0].message.content;
-    } catch (error) {
-      console.error('Groq failed, trying Ollama fallback:', error.message);
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 30000
+          }
+        );
+        console.log(`[Unified] Groq model ${model} succeeded`);
+        return response.data.choices[0].message.content;
+      } catch (error) {
+        console.error(`[Unified] Groq model ${model} failed:`, error.response?.data?.error?.message || error.message);
+      }
     }
+    console.error('[Unified] All Groq models failed, trying Ollama fallback');
   }
 
   // Fallback to Ollama
