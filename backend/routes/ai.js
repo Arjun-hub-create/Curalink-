@@ -31,12 +31,12 @@ async function detectAvailableModel() {
 
     if (models.length === 0) return null;
 
-    // Check if the configured model is available (match by prefix)
+    // Checking if the configured model is available (match by prefix)
     const configBase = OLLAMA_MODEL.split(':')[0];
     const match = models.find(m => m.startsWith(configBase));
     if (match) return match;
 
-    // Fallback: use the first available model
+    // Fallback: using the first available model
     console.log(`[Ollama] Configured model "${OLLAMA_MODEL}" not found, falling back to "${models[0]}"`);
     return models[0];
   } catch (err) {
@@ -46,13 +46,13 @@ async function detectAvailableModel() {
 }
 
 /**
- * Call Ollama with retry logic and model auto-detection fallback.
- * - Tries configured model first
- * - On failure, retries once after 2 seconds
+ * Calling Ollama with retry logic and model auto-detection fallback.
+ * - Trying configured model first
+ * - On failure, retrying once after 2 seconds
  * - If model not found, auto-detects available models and retries
  */
 async function callOllama(messages, system = SYSTEM_PROMPT) {
-  // Try Groq first — fast, free, runs Llama 3.3
+  // Groq Api Key
   if (process.env.GROQ_API_KEY) {
     try {
       const response = await axios.post(

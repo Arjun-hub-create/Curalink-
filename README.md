@@ -393,12 +393,12 @@ curalink/
 
 Built for the Humanity Founders Hackathon.
 
-
-<!-- frontend
+<!-- 
+frontend
 cd c:\Users\arjun\OneDrive\Documents\RESUME\curalink
-npm run dev:frontend -->
+npm run dev:frontend
 
-<!-- Backend
+Backend
 cd c:\Users\arjun\OneDrive\Documents\RESUME\curalink
 npm run dev:backend -->
 

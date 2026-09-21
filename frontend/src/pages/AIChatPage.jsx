@@ -100,8 +100,8 @@ function TypingIndicator() {
 /* ─── Status Banner ─── */
 function StatusBanner({ status, onDismiss }) {
   if (!status || status.ollamaRunning === undefined) return null
-  // Everything is good — no banner needed
-  if (status.ollamaRunning && status.modelReady) return null
+  // Everything is good — either Groq is configured or Ollama+model is ready
+  if (status.modelReady) return null
 
   const isDown = !status.ollamaRunning
   return (
@@ -119,9 +119,9 @@ function StatusBanner({ status, onDismiss }) {
         <div className="flex-1">
           {isDown ? (
             <>
-              <p className="font-semibold mb-1">Ollama is not running</p>
+              <p className="font-semibold mb-1">AI is not available</p>
               <p className="text-xs opacity-80 leading-relaxed">
-                The local AI needs Ollama to be running. Open a terminal and run:
+                No AI provider is configured. Set up Ollama locally or configure a Groq API key.
               </p>
               <code className="block mt-1.5 text-xs bg-black/30 rounded px-2 py-1 font-mono">ollama serve</code>
               <p className="text-xs opacity-60 mt-1.5">
@@ -258,7 +258,7 @@ export default function AIChatPage() {
 
       const errorContent = err.code === 'ECONNABORTED'
         ? `**Request timed out** — The AI took too long to respond. This can happen if the model is loading for the first time. Please try again.`
-        : `**Error:** ${serverError}\n\nMake sure Ollama is running (\`ollama serve\`) and has a model (\`ollama pull llama3.2\`).`
+        : `**Error:** ${serverError}\n\nPlease try again. If the issue persists, check the backend logs.`
 
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -278,19 +278,19 @@ export default function AIChatPage() {
   /* ─── Derive status indicator ─── */
   const statusColor = aiStatus === null
     ? 'bg-slate-500'                                    // not checked yet
-    : aiStatus.ollamaRunning && aiStatus.modelReady
-      ? 'bg-green-400'                                  // all good
+    : aiStatus.modelReady
+      ? 'bg-green-400'                                  // AI ready (Groq or Ollama)
       : aiStatus.ollamaRunning
         ? 'bg-amber-400'                                // running but model missing
-        : 'bg-red-400'                                  // ollama down
+        : 'bg-red-400'                                  // no AI available
 
   const statusText = aiStatus === null
     ? 'Checking AI status…'
-    : aiStatus.ollamaRunning && aiStatus.modelReady
-      ? `Online · ${aiStatus.activeModel}`
+    : aiStatus.modelReady
+      ? `Online · ${aiStatus.activeLLM || aiStatus.activeModel}`
       : aiStatus.ollamaRunning
         ? `Model not found`
-        : 'Ollama offline'
+        : 'AI offline'
 
   return (
     <div className="flex h-screen" style={{ maxHeight: 'calc(100vh - 0px)' }}>
@@ -345,7 +345,7 @@ export default function AIChatPage() {
           <div>
             <h1 className="font-display text-lg font-bold text-white">Cura AI</h1>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${statusColor} ${aiStatus?.ollamaRunning && aiStatus?.modelReady ? 'animate-pulse' : ''}`} />
+              <span className={`w-2 h-2 rounded-full ${statusColor} ${aiStatus?.modelReady ? 'animate-pulse' : ''}`} />
               <span className="text-xs text-slate-400">{statusText}</span>
             </div>
           </div>
