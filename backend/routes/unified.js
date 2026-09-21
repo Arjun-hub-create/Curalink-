@@ -289,7 +289,7 @@ async function callOllama(messages, system) {
               { role: 'system', content: system },
               ...messages
             ],
-            max_tokens: 2000,
+            max_tokens: 4096,
             temperature: 0.3
           },
           {
@@ -318,7 +318,7 @@ async function callOllama(messages, system) {
         ...messages
       ],
       stream: false,
-      options: { temperature: 0.3, top_p: 0.9, num_predict: 2000 }
+      options: { temperature: 0.3, top_p: 0.9, num_predict: 4096 }
     }, { timeout: 120000 });
     return response.data?.message?.content || '';
   } catch (error) {
@@ -399,7 +399,7 @@ function fallbackRanking(query, results, targetCount) {
   return {
     rankedResults: scored.slice(0, targetCount),
     queryAnalysis: `Keyword-based ranking for: "${query}"`,
-    coverageNotes: 'LLM not configured — using keyword scoring fallback.',
+    coverageNotes: 'AI ranking unavailable — results ranked by keyword matching.',
     llmUsed: false,
     totalAnalyzed: results.length
   };

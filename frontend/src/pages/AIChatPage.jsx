@@ -6,6 +6,7 @@ import {
   RiAlertLine, RiCheckboxCircleLine, RiErrorWarningLine
 } from 'react-icons/ri'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import api, { apiAI } from '../utils/api'
 import useAuthStore from '../store/authStore'
 import toast from 'react-hot-toast'
@@ -47,6 +48,7 @@ function Message({ msg }) {
           <p>{msg.content}</p>
         ) : (
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
               strong: ({ children }) => <strong className="text-sky-300 font-semibold">{children}</strong>,
@@ -54,9 +56,17 @@ function Message({ msg }) {
               ol: ({ children }) => <ol className="list-decimal ml-4 space-y-1 mb-2">{children}</ol>,
               li: ({ children }) => <li className="text-slate-300">{children}</li>,
               code: ({ children }) => <code className="bg-sky-500/15 px-1.5 py-0.5 rounded text-sky-300 text-xs font-mono">{children}</code>,
-              h3: ({ children }) => <h3 className="font-display font-bold text-white mt-3 mb-1 text-base">{children}</h3>,
               h2: ({ children }) => <h2 className="font-display font-bold text-white mt-3 mb-1 text-lg">{children}</h2>,
+              h3: ({ children }) => <h3 className="font-display font-bold text-white mt-3 mb-1 text-base">{children}</h3>,
+              h4: ({ children }) => <h4 className="font-display font-semibold text-sky-200 mt-2 mb-1 text-sm">{children}</h4>,
               blockquote: ({ children }) => <blockquote className="border-l-2 border-sky-500 pl-3 italic text-slate-400 my-2">{children}</blockquote>,
+              hr: () => <hr className="border-slate-700/50 my-3" />,
+              table: ({ children }) => <div className="overflow-x-auto my-2 rounded-lg border border-slate-700/50"><table className="w-full text-xs">{children}</table></div>,
+              thead: ({ children }) => <thead className="bg-sky-500/10 text-sky-300">{children}</thead>,
+              tbody: ({ children }) => <tbody className="divide-y divide-slate-700/30">{children}</tbody>,
+              tr: ({ children }) => <tr className="hover:bg-sky-500/5">{children}</tr>,
+              th: ({ children }) => <th className="px-3 py-1.5 text-left font-semibold text-sky-300">{children}</th>,
+              td: ({ children }) => <td className="px-3 py-1.5 text-slate-300">{children}</td>,
             }}
           >
             {msg.content}

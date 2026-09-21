@@ -14,10 +14,19 @@ const User = require('../models/User');
 const OLLAMA_BASE = process.env.OLLAMA_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2';
 
-const SYSTEM_PROMPT = `You are Cura, an expert AI medical research assistant for CuraLink.
-You help patients and researchers understand medical research, clinical trials, and treatments.
-Always note information is educational only, not medical advice.
-Use markdown formatting. Be accurate, empathetic, and clear.`;
+const SYSTEM_PROMPT = `You are Cura, a friendly and knowledgeable medical research assistant for CuraLink.
+You help patients and researchers understand medical research, clinical trials, and treatments in simple, easy-to-understand language.
+
+IMPORTANT RULES:
+- Write in plain, conversational English that anyone can understand
+- Use short paragraphs, bullet points, and numbered lists for clarity
+- NEVER use markdown tables (no | pipes) — use bullet points or numbered lists instead
+- Bold important terms with **bold** but keep explanations simple
+- Break complex topics into clear sections with ## headings
+- Always give complete, thorough answers — never cut short
+- End with a brief disclaimer that this is educational information, not medical advice
+- Be warm, empathetic, and encouraging
+- Avoid jargon — if you must use a medical term, explain it in parentheses right after`;
 
 /**
  * Detect the best available model from Ollama.
@@ -71,7 +80,7 @@ async function callOllama(messages, system = SYSTEM_PROMPT) {
               { role: 'system', content: system },
               ...messages
             ],
-            max_tokens: 1024,
+            max_tokens: 4096,
             temperature: 0.7
           },
           {
@@ -97,7 +106,7 @@ async function callOllama(messages, system = SYSTEM_PROMPT) {
       model: OLLAMA_MODEL,
       messages: [{ role: 'system', content: system }, ...messages],
       stream: false,
-      options: { temperature: 0.7, top_p: 0.9, num_predict: 1024 }
+      options: { temperature: 0.7, top_p: 0.9, num_predict: 4096 }
     }, { timeout: 120000 });
     return response.data?.message?.content || '';
   } catch (error) {
@@ -107,7 +116,7 @@ async function callOllama(messages, system = SYSTEM_PROMPT) {
 }
 
 function ollamaFallback(msg) {
-  return `**AI service is temporarily unavailable.**\n\nWe're having trouble connecting to the AI provider. Please try again in a moment.\n\nYour question: "${msg}"\n\n> All search features (PubMed, OpenAlex, ClinicalTrials) still work normally.`;
+  return `**Oops! I'm having a little trouble right now.** 😔\n\nI couldn't connect to my brain at the moment, but don't worry — this is usually temporary!\n\n**What you asked:** "${msg}"\n\nPlease try again in a few seconds. In the meantime, you can still use all the search features (PubMed, OpenAlex, Clinical Trials) — they work independently!`;
 }
 
 // ──────────────────────────────────────────────
@@ -139,7 +148,7 @@ router.post('/chat', optionalAuth, async (req, res) => {
       if (err.message === 'OLLAMA_NOT_RUNNING') {
         aiResponse = ollamaFallback(message);
       } else {
-        aiResponse = `**AI Error:** ${err.message}\n\nPlease check the backend console for details. Make sure Ollama is running (\`ollama serve\`) and has a model pulled (\`ollama pull llama3.2\`).`;
+        aiResponse = `**Sorry, I ran into an issue processing your question.** 😔\n\nThis is usually temporary — please try asking again in a moment. If the problem persists, try refreshing the page.`;
       }
     }
 
@@ -183,11 +192,11 @@ router.post('/summarize', optionalAuth, async (req, res) => {
   try {
     const { abstract, title, type = 'patient' } = req.body;
     const prompt = type === 'patient'
-      ? `Summarize this paper for a patient in 3-4 bullet points using plain English:\n\nTitle: ${title}\nAbstract: ${abstract}`
-      : `Technical summary with key findings, methodology, and clinical implications:\n\nTitle: ${title}\nAbstract: ${abstract}`;
+      ? `Summarize this research paper for someone without a medical background. Use 4-5 clear bullet points in everyday language. Explain what the study found, why it matters, and what it could mean for patients. Avoid jargon — if you use a medical term, explain it simply in parentheses.\n\nTitle: ${title}\nAbstract: ${abstract}`
+      : `Provide a detailed but clear summary of this research paper covering: the main findings, the methods used, how many people were studied, and what this means for future treatment or research. Use bullet points and simple headings.\n\nTitle: ${title}\nAbstract: ${abstract}`;
     let summary;
-    try { summary = await callOllama([{ role: 'user', content: prompt }], 'You are a medical research summarizer. Be concise and accurate.'); }
-    catch (err) { summary = err.message === 'OLLAMA_NOT_RUNNING' ? 'Start Ollama for AI summaries. See chat page for setup instructions.' : `Summary failed: ${err.message}`; }
+    try { summary = await callOllama([{ role: 'user', content: prompt }], 'You are a friendly medical research summarizer. Write in plain, simple English. Use bullet points, not tables. Be thorough but easy to understand. Never use markdown tables with | pipes.'); }
+    catch (err) { summary = err.message === 'OLLAMA_NOT_RUNNING' ? 'AI summary is temporarily unavailable. Please try again shortly.' : 'Could not generate summary right now. Please try again in a moment.'; }
     res.json({ summary });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -221,8 +230,8 @@ Return ONLY valid JSON (no markdown fences):
     } catch (err) {
       if (err.message === 'OLLAMA_NOT_RUNNING') {
         return res.json({
-          selected: results.slice(0, topN).map((r, i) => ({ index: i, relevanceScore: 80 - i*5, reasoning: 'Keyword rank (Ollama not running)', keyFinding: (r.abstract||'').slice(0,120), patientSummary: 'Start Ollama for AI-powered summaries' })),
-          queryAnalysis: `Results for: "${query}"`, coverageNotes: 'Start Ollama for LLM ranking', llmUsed: false
+          selected: results.slice(0, topN).map((r, i) => ({ index: i, relevanceScore: 80 - i*5, reasoning: 'Ranked by relevance', keyFinding: (r.abstract||'').slice(0,120), patientSummary: 'AI ranking temporarily unavailable — showing results by keyword relevance' })),
+          queryAnalysis: `Results for: "${query}"`, coverageNotes: 'Results ranked by keyword matching', llmUsed: false
         });
       }
       throw err;
@@ -293,8 +302,8 @@ router.get('/status', async (req, res) => {
 
   res.json({
     groqConfigured,
-    groqModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
-    activeLLM: groqConfigured ? `Groq (${process.env.GROQ_MODEL || 'openai/gpt-oss-120b'})` : 'Ollama (local)',
+    groqModel: 'Cura AI',
+    activeLLM: groqConfigured ? 'Cura AI' : 'Cura AI (Local)',
     ollamaRunning,
     availableModels,
     activeModel: OLLAMA_MODEL,

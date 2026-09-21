@@ -6,6 +6,7 @@ import {
   RiLoader4Line, RiMicroscopeLine, RiRobot2Line
 } from 'react-icons/ri'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 
@@ -141,7 +142,7 @@ export default function ArticlePage() {
               <RiRobot2Line /> Cura AI Summary
             </h2>
             <div className="prose-medical text-sm">
-              <ReactMarkdown>{summary}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
             </div>
           </motion.div>
         )}
