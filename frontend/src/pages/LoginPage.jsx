@@ -51,37 +51,37 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-              <div className="relative">
-                <RiMailLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <div className="relative flex items-center">
+                <RiMailLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
                 <input
                   type="email"
                   required
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
                   placeholder="doctor@hospital.com"
-                  className="medical-input pl-10"
+                  className="medical-input pl-11"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-              <div className="relative">
-                <RiLockLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <div className="relative flex items-center">
+                <RiLockLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
                 <input
                   type={showPass ? 'text' : 'password'}
                   required
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
                   placeholder="••••••••"
-                  className="medical-input pl-10 pr-10"
+                  className="medical-input pl-11 pr-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-sky-400 transition-colors"
+                  className="absolute right-3.5 text-slate-500 hover:text-sky-400 transition-colors z-10"
                 >
-                  {showPass ? <RiEyeOffLine /> : <RiEyeLine />}
+                  {showPass ? <RiEyeOffLine className="text-lg" /> : <RiEyeLine className="text-lg" />}
                 </button>
               </div>
             </div>

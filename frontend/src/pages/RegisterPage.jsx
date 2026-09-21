@@ -75,25 +75,25 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
-              <div className="relative">
-                <RiUserLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input type="text" required value={form.name} onChange={set('name')} placeholder="Dr. Jane Smith" className="medical-input pl-10" />
+              <div className="relative flex items-center">
+                <RiUserLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+                <input type="text" required value={form.name} onChange={set('name')} placeholder="Dr. Jane Smith" className="medical-input pl-11" />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-              <div className="relative">
-                <RiMailLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input type="email" required value={form.email} onChange={set('email')} placeholder="you@hospital.com" className="medical-input pl-10" />
+              <div className="relative flex items-center">
+                <RiMailLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+                <input type="email" required value={form.email} onChange={set('email')} placeholder="you@hospital.com" className="medical-input pl-11" />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
-              <div className="relative">
-                <RiLockLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input type="password" required value={form.password} onChange={set('password')} placeholder="Min. 6 characters" className="medical-input pl-10" />
+              <div className="relative flex items-center">
+                <RiLockLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+                <input type="password" required value={form.password} onChange={set('password')} placeholder="Min. 6 characters" className="medical-input pl-11" />
               </div>
             </div>
 
@@ -101,16 +101,16 @@ export default function RegisterPage() {
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">Specialization</label>
-                  <div className="relative">
-                    <RiStethoscopeLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input type="text" value={form.specialization} onChange={set('specialization')} placeholder="e.g. Oncology, Cardiology" className="medical-input pl-10" />
+                  <div className="relative flex items-center">
+                    <RiStethoscopeLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+                    <input type="text" value={form.specialization} onChange={set('specialization')} placeholder="e.g. Oncology, Cardiology" className="medical-input pl-11" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">Institution</label>
-                  <div className="relative">
-                    <RiHospitalLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input type="text" value={form.institution} onChange={set('institution')} placeholder="e.g. Johns Hopkins University" className="medical-input pl-10" />
+                  <div className="relative flex items-center">
+                    <RiHospitalLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+                    <input type="text" value={form.institution} onChange={set('institution')} placeholder="e.g. Johns Hopkins University" className="medical-input pl-11" />
                   </div>
                 </div>
               </motion.div>

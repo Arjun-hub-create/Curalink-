@@ -80,33 +80,33 @@ export default function ProfilePage() {
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
-            <div className="relative">
-              <RiUserLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input value={form.name} onChange={set('name')} className="medical-input pl-10" />
+            <div className="relative flex items-center">
+              <RiUserLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+              <input value={form.name} onChange={set('name')} className="medical-input pl-11" />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
-            <div className="relative">
-              <RiMailLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input value={user?.email || ''} disabled className="medical-input pl-10 opacity-50 cursor-not-allowed" />
+            <div className="relative flex items-center">
+              <RiMailLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+              <input value={user?.email || ''} disabled className="medical-input pl-11 opacity-50 cursor-not-allowed" />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Specialization</label>
-            <div className="relative">
-              <RiStethoscopeLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input value={form.specialization} onChange={set('specialization')} placeholder="e.g. Oncology, Cardiology, Neurology" className="medical-input pl-10" />
+            <div className="relative flex items-center">
+              <RiStethoscopeLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+              <input value={form.specialization} onChange={set('specialization')} placeholder="e.g. Oncology, Cardiology, Neurology" className="medical-input pl-11" />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Institution</label>
-            <div className="relative">
-              <RiHospitalLine className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input value={form.institution} onChange={set('institution')} placeholder="e.g. Johns Hopkins Hospital" className="medical-input pl-10" />
+            <div className="relative flex items-center">
+              <RiHospitalLine className="absolute left-3.5 text-slate-400 text-lg pointer-events-none z-10" />
+              <input value={form.institution} onChange={set('institution')} placeholder="e.g. Johns Hopkins Hospital" className="medical-input pl-11" />
             </div>
           </div>
 

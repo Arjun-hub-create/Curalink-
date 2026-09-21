@@ -61,29 +61,26 @@ export default function Dashboard() {
         </div>
 
         {/* Quick search bar */}
-        <motion.form
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
+        <form
           onSubmit={(e) => { e.preventDefault(); if (query.trim()) window.location.href = `/app/research?q=${encodeURIComponent(query)}` }}
-          className="mt-6 relative max-w-2xl"
+          className="mt-6 relative max-w-2xl flex items-center"
         >
-          <RiSearchLine className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl" />
+          <RiSearchLine className="absolute left-4 text-slate-400 text-xl pointer-events-none z-10" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search PubMed publications, conditions, authors..."
-            className="medical-input pl-12 pr-32 py-4 text-base"
+            className="medical-input pl-12 pr-28 py-4 text-base w-full"
           />
           <motion.button
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 btn-primary px-5 py-2 text-sm"
+            className="absolute right-2.5 btn-primary px-5 py-2.5 text-sm font-medium z-10 flex items-center justify-center shrink-0"
           >
             Search
           </motion.button>
-        </motion.form>
+        </form>
       </motion.div>
 
       {/* Quick links */}
